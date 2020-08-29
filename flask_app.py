@@ -8,7 +8,7 @@ import io
 from datetime import timedelta
 
 #from processing import process_data
-from processing import check_first,  subkontoList, exception, korrekt_dateSwed, korrekt_dateSEB, korrekt_dateLHV, first_row, mailSQL
+from processing import check_first,  subkontoList, exception, korrekt_dateSwed, korrekt_dateSEB, korrekt_dateLHV, first_row, mailSQL, mailText
 import csv
 import confid
 
@@ -379,7 +379,7 @@ def file_summer_page():
 
 
             formail = db.session.query(LOGS.log_user, LOGS.log_time, AA.aa_ow).join(AA, LOGS.log_aa==AA.aa_aa).order_by(db.desc(LOGS.log_id)).limit(1).all()
-            mailSQL(formail)
+            mailSQL(mailText(formail))
             return response
 
 
