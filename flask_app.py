@@ -21,12 +21,8 @@ app.config["SECRET_KEY"] = confid.secret_key
 
 
 
-SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
-    username=confid.sql_user,
-    password=confid.sql_pass,
-    hostname="docha.mysql.eu.pythonanywhere-services.com",
-    databasename="docha$comments",
-)
+SQLALCHEMY_DATABASE_URI = confid.SQLALCHEMY_DATABASE_URI
+
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
 app.config["SQLALCHEMY_POOL_RECYCLE"] = 299
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
