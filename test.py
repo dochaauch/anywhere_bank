@@ -2,6 +2,7 @@ from flask import Flask, redirect, render_template, request, url_for, session, m
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, date
 import confid
+from processing import mailText
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
@@ -48,3 +49,7 @@ for row in formail:
     print("user: " + r['log_user'] + "\n" + "time: " + d + "\n" + "owner: " + r['aa_ow'] + "\n" + "a/a: " + r['log_aa'])
 print(formail[0])
 print(type(formail[0]))
+print("____________")
+
+print(mailText(formail))
+
