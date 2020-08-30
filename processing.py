@@ -5,6 +5,8 @@ import yagmail
 import confid
 
 
+
+
 def calculate_mode(number_list):
     try:
         return "The mode of the numbers is {}".format(statistics.mode(number_list))
@@ -113,6 +115,14 @@ def first_row(all_dates):
         return first_rowOut
 
 
+def mailText(formail):
+    for row in formail:
+        r = row._asdict()
+        d = row._asdict()['log_time'].strftime("%d.%m.%y %H:%M:%S")
+        out_email = str("user: " + r['log_user'] + "\n" + "time: " + d + "\n" + "owner: " + r['aa_ow'] + "\n" + "a/a: " + r['log_aa'])
+    return out_email
+
+
 def mailSQL(formail):
     yag = yagmail.SMTP(user=confid.user, password=confid.password,
                            host='smtp.gmail.com')
@@ -123,3 +133,4 @@ def mailSQL(formail):
         contents=formail,
             )
     return yag.send
+
