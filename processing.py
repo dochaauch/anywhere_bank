@@ -116,7 +116,6 @@ def first_row(all_dates):
 
 
 def mailText(formail):
-    #formail = db.session.query(LOGS.log_user, LOGS.log_time, AA.aa_ow, LOGS.log_aa).join(AA,LOGS.log_aa == AA.aa_aa).order_by(db.desc(LOGS.log_id)).limit(1).all()
     for row in formail:
         r = row._asdict()
         d = row._asdict()['log_time'].strftime("%d.%m.%y %H:%M:%S")
