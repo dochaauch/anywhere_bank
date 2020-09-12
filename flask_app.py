@@ -220,14 +220,11 @@ def file_summer_page():
                                     sumSub = subkonto.get(row['aa'])[i][2]
                                 i = i+1
                             else:  #если суммы нет - закрывается все на первый субконто
-                                i = 0
-                                sk, shet, subschet, err_flagCh = matchSubkonto(subkonto,row,i)
+                                sk, shet, subschet, err_flagCh = matchSubkonto(subkonto,row)
                         else: #если только одна сумма у субконто - закрывается все на первый субконто
-                            i = 0
-                            sk, shet, subschet, err_flagCh = matchSubkonto(subkonto,row,i)
+                            sk, shet, subschet, err_flagCh = matchSubkonto(subkonto,row)
                     else:  #если закрываем суммарно субконто + закрываем пени у квартир
-                        i = 0
-                        sk, shet, subschet, err_flagCh = matchSubkonto(subkonto,row,i)
+                        sk, shet, subschet, err_flagCh = matchSubkonto(subkonto,row)
                         sumSub = subkonto.get(row['aa'])[0][2]
 
 
