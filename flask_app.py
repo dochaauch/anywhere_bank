@@ -8,7 +8,7 @@ import io
 from datetime import timedelta
 
 #from processing import process_data
-from processing import check_first,  subkontoList, exception, korrekt_dateSwed, korrekt_dateSEB, korrekt_dateLHV, first_row, mailSQL, mailText
+from processing import check_first,  subkontoList, exception, korrekt_dateSwed, korrekt_dateSEB, korrekt_dateLHV, first_row, mailSQL, mailText, matchSubkonto
 import csv
 import confid
 
@@ -55,16 +55,6 @@ def load_user(user_id):
     return User.query.filter_by(username=user_id).first()
 
 
-class Comment(db.Model):
-
-    __tablename__ = "comments"
-
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(4096))
-    posted = db.Column(db.DateTime, default=datetime.now)
-    commenter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    commenter = db.relationship('User', foreign_keys=commenter_id)
-
 
 
 @app.before_request
@@ -72,18 +62,6 @@ def make_session_permanent():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(minutes=15)
 
-@app.route("/comments/", methods=["GET", "POST"])
-def index1():
-    if request.method == "GET":
-        return render_template("main_page.html", comments=Comment.query.all())
-
-    if not current_user.is_authenticated:
-        return redirect(url_for('index1'))
-
-    comment = Comment(content=request.form["contents"], commenter=current_user)
-    db.session.add(comment)
-    db.session.commit()
-    return redirect(url_for('index1'))
 
 
 
@@ -233,33 +211,27 @@ def file_summer_page():
 
 
                 if row['aa'] in subkonto:
+                    FindSum=0
                     if IgaSubkonto =="1":  #если нужно закрывать каждый счет отдельно
                         if len(subkonto.get(row['aa'])) > 1:
                             i = 0
-                            while i <= len(subkonto.get(row['aa']))-1: #ищем совпадающую сумму в субконто
+                            countArve =len(subkonto.get(row['aa']))-1
+                            while i <= countArve: #ищем совпадающую сумму в субконто
                                 if subkonto.get(row['aa'])[i][2] == str(row['summa']).replace(',', '.'):
-                                    sk = subkonto.get(row['aa'])[i][3]
-                                    shet = subkonto.get(row['aa'])[i][4]
-                                    subshet = str(subkonto.get(row['aa'])[i][5]).strip('\'\"\]')
+                                    sk, shet, subschet, err_flagCh = matchSubkonto(subkonto, row, i)
                                     sumSub = subkonto.get(row['aa'])[i][2]
-                                    err_flagCh = '0'
-                                i = i+1
-                            else:  #если суммы нет - закрывается все на первый субконто
-                                sk = subkonto.get(row['aa'])[0][3]
-                                shet = subkonto.get(row['aa'])[0][4]
-                                subshet = str(subkonto.get(row['aa'])[0][5]).strip('\'\"\]')
-                                err_flagCh = '0'
+                                    FindSum = 1
+                                i += 1
+
+                            else: #если суммы нет - закрывается все на первый субконто
+                                if FindSum ==0:
+                                    sk, shet, subschet, err_flagCh = matchSubkonto(subkonto, row)
+
                         else: #если только одна сумма у субконто - закрывается все на первый субконто
-                            sk = subkonto.get(row['aa'])[0][3]
-                            shet = subkonto.get(row['aa'])[0][4]
-                            subshet = str(subkonto.get(row['aa'])[0][5]).strip('\'\"\]')
-                            err_flagCh = '0'
+                            sk, shet, subschet, err_flagCh = matchSubkonto(subkonto, row)
                     else:  #если закрываем суммарно субконто + закрываем пени у квартир
-                        sk = subkonto.get(row['aa'])[0][3]
-                        shet = subkonto.get(row['aa'])[0][4]
-                        subshet = str(subkonto.get(row['aa'])[0][5]).strip('\'\"\]')
+                        sk, shet, subschet, err_flagCh = matchSubkonto(subkonto,row)
                         sumSub = subkonto.get(row['aa'])[0][2]
-                        err_flagCh = '0'
 
 
 
