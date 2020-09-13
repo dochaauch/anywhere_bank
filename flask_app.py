@@ -155,23 +155,17 @@ def file_summer_page():
             if valjavotte == 'SEB':
                 col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col0','kood', 'tuup', 'summa', 'viite',
                 'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
+                readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
             if valjavotte == 'SWED' or 'SWEDCR':
                 col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi','col1', 'col0', 'tuup', 'summa', 'viite',
                 'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
+                readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
+                next(readerS)  # пропускаем первую строку с заголовками
             if valjavotte == 'LHV':
                 col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi','col1', 'col0', 'tuup', 'summa', 'viite',
                 'arhiiv', 'selgitus', 'col', 'valuuta', 'col2', 'col3', 'col4', 'col5', 'col6']
-
-            #usecols=['kuupaev', 'aa', 'nimi', 'tuup', 'summa', 'selgitus']
-
-            if valjavotte == 'SWED' or 'SWEDCR' or 'SEB':
-                readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
-            if valjavotte == 'LHV':
                 readerS = csv.DictReader(csv_file, delimiter=',', fieldnames=col_names)
-            if valjavotte == 'SEB':
-                pass  #оставляем ничего не меняя
-            elif valjavotte == 'SWED' or 'SWEDCR' or 'LHV':
-                next(readerS)  #пропускаем первую строку с заголовками
+                next(readerS)  # пропускаем первую строку с заголовками
 
 
             for row in readerS:
