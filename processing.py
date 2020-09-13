@@ -135,7 +135,7 @@ def mailSQL(formail):
     return yag.send
 
 
-def matchSubkonto(subkonto,row,i=0):
+def matchSubkonto(subkonto,row, i=0):
     sk = subkonto.get(row['aa'])[i][3]
     shet = subkonto.get(row['aa'])[i][4]
     subshet = str(subkonto.get(row['aa'])[i][5]).strip('\'\"\]')
