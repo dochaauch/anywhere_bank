@@ -3,6 +3,7 @@ import csv
 import pandas as pd
 import yagmail
 import confid
+import re
 
 
 
@@ -142,3 +143,16 @@ def matchSubkonto(subkonto,row, i=0):
     err_flagCh = '0'
 
     return sk, shet, subshet, err_flagCh
+
+
+def terminalSumSwed(selg):
+    SumAtS = str(selg[5]).split(':')[1]  # вытаскиваем сумму реализации из пояснения
+    SumTerm = str(selg[6]).split(':')[1]  # вытаскием сумму расходов из пояснения
+
+    return SumAtS, SumTerm
+
+def terminalSumSeb(selg, summa):
+    SumTerm = re.search(r'\d+\.\d{2}', str(selg)).group(0) # вытаскием сумму расходов из пояснения
+    SumAtS = str(format(float(str(summa).replace(',', '.')) + float(SumTerm),'.2f')) # реализация = сумма по выписке
+                                                                                    #  + расходы на терминал
+    return SumAtS, SumTerm

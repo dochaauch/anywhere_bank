@@ -8,7 +8,8 @@ import io
 from datetime import timedelta
 
 #from processing import process_data
-from processing import check_first,  subkontoList, exception, korrekt_dateSwed, korrekt_dateSEB, korrekt_dateLHV, first_row, mailSQL, mailText, matchSubkonto
+from processing import check_first,  subkontoList, exception, korrekt_dateSwed, korrekt_dateSEB, korrekt_dateLHV, \
+    first_row, mailSQL, mailText, matchSubkonto, terminalSumSwed, terminalSumSeb
 import csv
 import confid
 
@@ -245,12 +246,14 @@ def file_summer_page():
                             subkonto.get(row['aa'])[0][2] = "0.00"
                     else:
                         SumAtS = str(row['summa']).replace(',', '.')
-                        #SumAtS=selg[5]
+
                     if variableDict['terminal']== '1':  #перебираем терминалы из установочного файла
                         for term_item in termList:
-                            if term_item in row['selgitus']:
-                                SumAtS=str(selg[5]).split(':')[1] #вытаскиваем сумму реализации из пояснения
-                                SumTerm = str(selg[6]).split(':')[1] #вытаскием сумму расходов из пояснения
+                            if term_item in row['selgitus']: #вытаскиваем сумму реализации и расхода из пояснения
+                                if valjavotte == 'SWED':
+                                    SumAtS, SumTerm = terminalSumSwed(selg)
+                                if valjavotte == 'SEB':
+                                    SumAtS, SumTerm = terminalSumSeb(selg, row['summa'])
                     DShet = '"' + variableDict['ShetPank'] +'"'
                     DSubShet = '"' + variableDict['SubShetPank']+'"'
                     KShet = '"' + shet + '"'
@@ -348,5 +351,5 @@ def file_summer_page():
             return response
 
 
-        #return '''
+
         return render_template("statement.html", error=True)
