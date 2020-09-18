@@ -213,19 +213,19 @@ def file_summer_page():
                             countArve =len(subkonto.get(row['aa']))-1
                             while i <= countArve: #ищем совпадающую сумму в субконто
                                 if subkonto.get(row['aa'])[i][2] == str(row['summa']).replace(',', '.'):
-                                    sk, shet, subschet, err_flagCh = matchSubkonto(subkonto, row, i)
+                                    sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row, i)
                                     sumSub = subkonto.get(row['aa'])[i][2]
                                     FindSum = 1
                                 i += 1
 
                             else: #если суммы нет - закрывается все на первый субконто
                                 if FindSum ==0:
-                                    sk, shet, subschet, err_flagCh = matchSubkonto(subkonto, row)
+                                    sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row)
 
                         else: #если только одна сумма у субконто - закрывается все на первый субконто
-                            sk, shet, subschet, err_flagCh = matchSubkonto(subkonto, row)
+                            sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row)
                     else:  #если закрываем суммарно субконто + закрываем пени у квартир
-                        sk, shet, subschet, err_flagCh = matchSubkonto(subkonto,row)
+                        sk, shet, subshet, err_flagCh = matchSubkonto(subkonto,row)
                         sumSub = subkonto.get(row['aa'])[0][2]
 
 
