@@ -157,12 +157,12 @@ def file_summer_page():
                 col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col0','kood', 'tuup', 'summa', 'viite',
                 'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
                 readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
-            if valjavotte == 'SWED' or 'SWEDCR':
+            elif valjavotte == 'SWED' or 'SWEDCR':
                 col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi','col1', 'col0', 'tuup', 'summa', 'viite',
                 'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
                 readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
                 next(readerS)  # пропускаем первую строку с заголовками
-            if valjavotte == 'LHV':
+            elif valjavotte == 'LHV':
                 col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi','col1', 'col0', 'tuup', 'summa', 'viite',
                 'arhiiv', 'selgitus', 'col', 'valuuta', 'col2', 'col3', 'col4', 'col5', 'col6']
                 readerS = csv.DictReader(csv_file, delimiter=',', fieldnames=col_names)
@@ -172,11 +172,11 @@ def file_summer_page():
             for row in readerS:
                 if valjavotte == 'SWED':
                     row['kuupaev'] = korrekt_dateSwed(row['kuupaev'])
-                if valjavotte == 'SEB':
+                elif valjavotte == 'SEB':
                     row['kuupaev'] = korrekt_dateSEB(row['kuupaev'])
-                if valjavotte == 'LHV':
+                elif valjavotte == 'LHV':
                     row['kuupaev'] = korrekt_dateLHV(row['kuupaev'])
-                if valjavotte == 'SWEDCR':
+                elif valjavotte == 'SWEDCR':
                     row['kuupaev'] =str(row['selgitus']).split(' ')[1]
                     selg=str(row['selgitus']).strip(' ').split(' ')[2:]
                     row['selgitus'] =''.join(selg).strip()
@@ -252,7 +252,7 @@ def file_summer_page():
                             if term_item in row['selgitus']: #вытаскиваем сумму реализации и расхода из пояснения
                                 if valjavotte == 'SWED':
                                     SumAtS, SumTerm = terminalSumSwed(selg)
-                                if valjavotte == 'SEB':
+                                elif valjavotte == 'SEB':
                                     SumAtS, SumTerm = terminalSumSeb(selg, row['summa'])
                     DShet = '"' + variableDict['ShetPank'] +'"'
                     DSubShet = '"' + variableDict['SubShetPank']+'"'
@@ -263,7 +263,7 @@ def file_summer_page():
                 else:
                     if valjavotte == 'SWED' or 'LHV' or 'SWEDCR': #убираем знак минус из выписки
                         SumAtS = str(row['summa']).replace(',', '.')[1:] #сумма в строке, если без пени
-                    if valjavotte == 'SEB':
+                    elif valjavotte == 'SEB':
                         SumAtS = str(row['summa']).replace(',', '.')
                     KShet = '"' +variableDict['ShetPank']+'"'
                     KSubShet = '"' +variableDict['SubShetPank']+'"'
