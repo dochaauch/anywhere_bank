@@ -7,7 +7,6 @@ from werkzeug.security import check_password_hash
 import io
 from datetime import timedelta
 
-#from processing import process_data
 from processing import check_first,  subkontoList, exception, korrekt_dateSwed, korrekt_dateSEB, korrekt_dateLHV, \
     first_row, mailSQL, mailText, matchSubkonto, terminalSumSwed, terminalSumSeb
 import csv
@@ -147,7 +146,6 @@ def file_summer_page():
             output_data1 = ''
             error_part = ''
             err_first =''
-            col_names = []
             all_dates = []
 
 
@@ -157,7 +155,7 @@ def file_summer_page():
                 col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col0','kood', 'tuup', 'summa', 'viite',
                 'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
                 readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
-            elif valjavotte == 'SWED' or 'SWEDCR':
+            elif valjavotte in ('SWED', 'SWEDCR'):
                 col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi','col1', 'col0', 'tuup', 'summa', 'viite',
                 'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
                 readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
@@ -179,19 +177,19 @@ def file_summer_page():
                 elif valjavotte == 'SWEDCR':
                     row['kuupaev'] =str(row['selgitus']).split(' ')[1]
                     selg=str(row['selgitus']).strip(' ').split(' ')[2:]
-                    row['selgitus'] =''.join(selg).strip()
+                    row['selgitus'] = ''.join(selg).strip()
                 log_aa = row['meie']
                 # подтягиваем значения из шестерки
                 sk = ''
                 shet = ''
                 subshet = ''
-                SumViivis =''
+                SumViivis = ''
                 err_flagCh = '1'
                 tv=''
-                termList= str(variableDict['term_nr']).split(' --/-- ')
+                termList = str(variableDict['term_nr']).split(' --/-- ')
                 selg = row['selgitus'].split(';')
-                SumTerm=''
-                tterm=''
+                SumTerm = ''
+                tterm = ''
 
 
                 # прокручиваем список исключений без расчетных счетов
@@ -207,10 +205,10 @@ def file_summer_page():
 
                 if row['aa'] in subkonto:
                     FindSum=0
-                    if IgaSubkonto =="1":  #если нужно закрывать каждый счет отдельно
+                    if IgaSubkonto == "1":  #если нужно закрывать каждый счет отдельно
                         if len(subkonto.get(row['aa'])) > 1:
                             i = 0
-                            countArve =len(subkonto.get(row['aa']))-1
+                            countArve = len(subkonto.get(row['aa']))-1
                             while i <= countArve: #ищем совпадающую сумму в субконто
                                 if subkonto.get(row['aa'])[i][2] == str(row['summa']).replace(',', '.'):
                                     sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row, i)
@@ -225,7 +223,7 @@ def file_summer_page():
                         else: #если только одна сумма у субконто - закрывается все на первый субконто
                             sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row)
                     else:  #если закрываем суммарно субконто + закрываем пени у квартир
-                        sk, shet, subshet, err_flagCh = matchSubkonto(subkonto,row)
+                        sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row)
                         sumSub = subkonto.get(row['aa'])[0][2]
 
 
@@ -237,31 +235,31 @@ def file_summer_page():
                 if row['tuup'] == 'C':
                     if viivis == '1' and sumSub !='':  #если нужно закрывать пени у квартир и есть сумма в субконто
                         if float(sumSub)>=float(str(row['summa']).replace(',', '.')): #если пени больше перевода
-                            SumViivis = str(format(float(str(row['summa']).replace(',', '.')),'.2f'))
+                            SumViivis = str(format(float(str(row['summa']).replace(',', '.')), '.2f'))
                             SumAtS=str("0.00")
                             subkonto.get(row['aa'])[0][2] = float(sumSub)-float(str(row['summa']).replace(',', '.'))
                         else:
                             SumViivis = str(format(float(sumSub),'.2f')) #если пени меньше перевода
-                            SumAtS=str(format(float(str(row['summa']).replace(',', '.'))-float(SumViivis),'.2f'))
+                            SumAtS=str(format(float(str(row['summa']).replace(',', '.'))-float(SumViivis), '.2f'))
                             subkonto.get(row['aa'])[0][2] = "0.00"
                     else:
                         SumAtS = str(row['summa']).replace(',', '.')
 
-                    if variableDict['terminal']== '1':  #перебираем терминалы из установочного файла
+                    if variableDict['terminal'] == '1':  #перебираем терминалы из установочного файла
                         for term_item in termList:
                             if term_item in row['selgitus']: #вытаскиваем сумму реализации и расхода из пояснения
                                 if valjavotte == 'SWED':
                                     SumAtS, SumTerm = terminalSumSwed(selg)
                                 elif valjavotte == 'SEB':
                                     SumAtS, SumTerm = terminalSumSeb(selg, row['summa'])
-                    DShet = '"' + variableDict['ShetPank'] +'"'
-                    DSubShet = '"' + variableDict['SubShetPank']+'"'
+                    DShet = '"' + variableDict['ShetPank'] + '"'
+                    DSubShet = '"' + variableDict['SubShetPank'] + '"'
                     KShet = '"' + shet + '"'
                     KSubShet = '"' + subshet + '"'
                     DSubkonto = variableDict['Subkonto']
                     KSubkonto = sk
                 else:
-                    if valjavotte == 'SWED' or 'LHV' or 'SWEDCR': #убираем знак минус из выписки
+                    if valjavotte in ('SWED', 'LHV', 'SWEDCR'): #убираем знак минус из выписки
                         SumAtS = str(row['summa']).replace(',', '.')[1:] #сумма в строке, если без пени
                     elif valjavotte == 'SEB':
                         SumAtS = str(row['summa']).replace(',', '.')
@@ -275,14 +273,14 @@ def file_summer_page():
 
 
                 # собираем строку в файл вывода
-                tt = '"' +variableDict['zhurnal']+'"' +',' + \
+                tt = '"' +variableDict['zhurnal']+'"' + ',' + \
                      '"' + row['kuupaev'] + '",' + \
                      DShet + ','+ \
                      DSubShet + ',' + \
                      KShet + ',' + \
                      KSubShet + ',' + \
                      '"' + SumAtS + '",' + \
-                     '"' + row['selgitus']  +' ' + row['nimi'] + '",'+ \
+                     '"' + row['selgitus'] + ' ' + row['nimi'] + '",' + \
                      '"' + DSubkonto + '",' + \
                      '"' + KSubkonto + '",' + \
                      '"","",""'+'\r\n'
@@ -292,17 +290,17 @@ def file_summer_page():
                 if SumViivis != '':  #собираем строку пени
                     KShet = '"62"'
                     KSubShet = '"4"'
-                    tv = '"' +variableDict['zhurnal']+'"' +',' + \
-                     '"' + row['kuupaev'] + '",' + \
-                     DShet + ','+ \
-                     DSubShet + ',' + \
-                     KShet + ',' + \
-                     KSubShet + ',' + \
-                     '"' + SumViivis + '",' + \
-                     '"' +'VI ' + row['selgitus']  +' ' + row['nimi'] + '",'+ \
-                     '"' + DSubkonto + '",' + \
-                     '"' + KSubkonto + '",' + \
-                     '"","",""'+'\r\n'
+                    tv = '"' +variableDict['zhurnal']+'"' + ',' + \
+                        '"' + row['kuupaev'] + '",' + \
+                        DShet + ',' + \
+                        DSubShet + ',' + \
+                        KShet + ',' + \
+                        KSubShet + ',' + \
+                        '"' + SumViivis + '",' + \
+                        '"' + 'VI ' + row['selgitus'] + ' ' + row['nimi'] + '",'+ \
+                        '"' + DSubkonto + '",' + \
+                        '"' + KSubkonto + '",' + \
+                        '"","",""'+'\r\n'
 
                 if SumTerm !='': #собираем строку услуг за терминал за сделку
                     DShet =variableDict['kulud'].split(',')[0].strip('"')
@@ -311,45 +309,40 @@ def file_summer_page():
                     KShet = '"' + variableDict['ShetPank'] +'"'
                     KSubShet = '"' + variableDict['SubShetPank']+'"'
                     KSubkonto = variableDict['Subkonto']
-                    tterm = '"' +variableDict['zhurnal']+'"' +',' + \
-                     '"' + row['kuupaev'] + '",' + \
-                     '"' +DShet +  '",'+ \
-                     DSubShet + ',' + \
-                     KShet + ',' + \
-                     KSubShet + ',' + \
-                     '"' + SumTerm + '",' + \
-                     '"'  + row['selgitus']   + '",'+ \
-                     '"' + DSubkonto + '",' + \
-                     '"' + KSubkonto + '",' + \
-                     '"","",""'+'\r\n'
+                    tterm = '"' +variableDict['zhurnal']+'"' + ',' + \
+                        '"' + row['kuupaev'] + '",' + \
+                        '"' +DShet + '",' + \
+                        DSubShet + ',' + \
+                        KShet + ',' + \
+                        KSubShet + ',' + \
+                        '"' + SumTerm + '",' + \
+                        '"' + row['selgitus'] + '",' + \
+                        '"' + DSubkonto + '",' + \
+                        '"' + KSubkonto + '",' + \
+                        '"","",""'+'\r\n'
 
 
                 output_data1 = output_data1+ tt + tv + tterm
 
                 if err_flagCh == '1':  #собираем вывод ошибок
-                    err_first = '\n\n\n'+ '---ERROR PART---'+'\n'
-                    err_tt = '--ERROR--'+ tt+row['aa']+'\n'
+                    err_first = '\n\n\n' + '---ERROR PART---'+'\n'
+                    err_tt = '--ERROR--' + tt+row['aa']+'\n'
                     error_part = error_part + err_tt
 
-
-
-
-            first_rowOut = first_row(all_dates)+'"' +variableDict['zhurnal']+'"'+ '\r\n'
+            first_rowOut = first_row(all_dates) + '"' + variableDict['zhurnal']+'"'+ '\r\n'
 
             output_data = str(first_rowOut) + output_data1+err_first + error_part
 
             response = make_response(output_data)
             response.headers["Content-Disposition"] = "attachment; filename=result.txt"
 
-            log_row = LOGS(log_user=current_user.username, log_aa= log_aa,  log_stat=valjavotte)
+            log_row = LOGS(log_user=current_user.username, log_aa=log_aa, log_stat=valjavotte)
             db.session.add(log_row)
             db.session.commit()
 
-            formail = db.session.query(LOGS.log_user, LOGS.log_time, AA.aa_ow, LOGS.log_aa).join(AA, LOGS.log_aa == AA.aa_aa)\
-                .order_by(db.desc(LOGS.log_id)).limit(1).all()
+            formail = db.session.query(LOGS.log_user, LOGS.log_time, AA.aa_ow, LOGS.log_aa).join(AA,
+                            LOGS.log_aa == AA.aa_aa).order_by(db.desc(LOGS.log_id)).limit(1).all()
             mailSQL(mailText(formail))
             return response
-
-
 
         return render_template("statement.html", error=True)

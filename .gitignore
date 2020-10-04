@@ -5,3 +5,4 @@ docha$comments.db
 db-backup.sql
 .idea/
 .idea/workspace.xml
+test.py

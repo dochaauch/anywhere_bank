@@ -1,6 +1,5 @@
 import statistics
 import csv
-import pandas as pd
 import yagmail
 import confid
 import re
