@@ -151,7 +151,7 @@ def terminalSumSwed(selg):
     return SumAtS, SumTerm
 
 def terminalSumSeb(selg, summa):
-    SumTerm = re.search(r'\d+\.\d{2}', str(selg)).group(0) # вытаскием сумму расходов из пояснения
+    SumTerm = re.search(r'\d+\.\d{2}', str(selg)).group(0)  # вытаскием сумму расходов из пояснения
     SumAtS = str(format(float(str(summa).replace(',', '.')) + float(SumTerm),'.2f')) # реализация = сумма по выписке
                                                                                     #  + расходы на терминал
     return SumAtS, SumTerm

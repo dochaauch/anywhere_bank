@@ -234,18 +234,19 @@ def file_summer_page():
 
                 if row['tuup'] == 'C':
                     if viivis == '1' and sumSub !='':  #если нужно закрывать пени у квартир и есть сумма в субконто
-                        if float(sumSub)>=float(str(row['summa']).replace(',', '.')): #если пени больше перевода
-                            SumViivis = str(format(float(str(row['summa']).replace(',', '.')), '.2f'))
-                            SumAtS=str("0.00")
-                            subkonto.get(row['aa'])[0][2] = float(sumSub)-float(str(row['summa']).replace(',', '.'))
+                        row_summa = float(str(row['summa']).replace(',', '.'))
+                        if float(sumSub)>=row_summa: #если пени больше перевода
+                            SumViivis = str(format(row_summa, '.2f'))
+                            SumAtS = str("0.00")
+                            subkonto.get(row['aa'])[0][2] = float(sumSub)-row_summa
                         else:
                             SumViivis = str(format(float(sumSub),'.2f')) #если пени меньше перевода
-                            SumAtS=str(format(float(str(row['summa']).replace(',', '.'))-float(SumViivis), '.2f'))
+                            SumAtS=str(format(row_summa-float(SumViivis), '.2f'))
                             subkonto.get(row['aa'])[0][2] = "0.00"
                     else:
                         SumAtS = str(row['summa']).replace(',', '.')
 
-                    if variableDict['terminal'] == '1':  #перебираем терминалы из установочного файла
+                    if variableDict['terminal'] == '1':  #перебираем терминалы аtermListиз установочного файла
                         for term_item in termList:
                             if term_item in row['selgitus']: #вытаскиваем сумму реализации и расхода из пояснения
                                 if valjavotte == 'SWED':
