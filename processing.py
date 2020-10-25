@@ -47,23 +47,21 @@ def subkontoList(sbkonto, igasubkonto):
 
     subkonto = {}
     for row in reader:
-        if igasubkonto=="0":
+        if igasubkonto == "0":
             key = row[0].strip()
             if key in subkonto:
                 # implement your duplicate row handling here
                 pass
-            val = [row[1].strip(), row[2].strip(), row[3].strip(),
-                row[4].strip(), row[5].strip(), row[6].strip()]
+            val = [x.strip() for x in row if x != row[0]] #убираем лишние пробелы у всех позиций списка,
+                                                            # начиная со второй
             subkonto[key] = [val]
-        if igasubkonto=="1":
+        if igasubkonto == "1":
             key = row[0].strip()
             if key in subkonto:
-                val0 = [row[1].strip(), row[2].strip(), row[3].strip(),
-                row[4].strip(), row[5].strip(), row[6].strip()]
+                val0 = [x.strip() for x in row if x != row[0]]
                 subkonto[key].append(val0)
             else:
-                val = [row[1].strip(),row[2].strip(),row[3].strip(),
-                row[4].strip(),row[5].strip(),row[6].strip()]
+                val = [x.strip() for x in row if x != row[0]]
                 subkonto[key] = [val]
     return subkonto
 
