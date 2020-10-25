@@ -1,28 +1,8 @@
-import statistics
 import csv
 import yagmail
 import confid
 import re
 
-
-
-
-def calculate_mode(number_list):
-    try:
-        return "The mode of the numbers is {}".format(statistics.mode(number_list))
-    except statistics.StatisticsError as exc:
-        return "Error calculating mode: {}".format(exc)
-
-
-
-def process_data(input_data):
-    result = ""
-    for line in input_data.split("\n"):
-        if line != "":
-            numbers = [float(n) for n in line.split(",")]
-            result += str(sum(numbers))
-        result += "\n"
-    return result
 
 
 
