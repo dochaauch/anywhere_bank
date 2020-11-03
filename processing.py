@@ -97,7 +97,8 @@ def mailText(formail):
     for row in formail:
         r = row._asdict()
         d = row._asdict()['log_time'].strftime("%d.%m.%y %H:%M:%S")
-        out_email = str("user: " + r['log_user'] + "\n" + "time: " + d + "\n" + "owner: " + r['aa_ow'] + "\n" + "a/a: " + r['log_aa'])
+        out_email = str("user: " + r['log_user'] + "\n" + "time: " + d + "\n" + "owner: " + r['aa_ow'] + "\n" +
+                        "a/a: " + r['log_aa'])
     return out_email
 
 

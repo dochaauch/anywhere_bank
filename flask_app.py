@@ -128,8 +128,16 @@ def file_summer_page():
             variableDict = check_first(first)
 
             sbkonto_f = request.files["input_subkonto"]
-            IgaSubkonto = variableDict['IgaSubkonto']
-            viivis = variableDict['viivis']
+            try:
+                IgaSubkonto = variableDict['IgaSubkonto']
+                viivis = variableDict['viivis']
+                terminal = variableDict['terminal']
+                termList = str(variableDict['term_nr']).split(' --/-- ')
+            except:
+                IgaSubkonto = "0"
+                viivis = "0"
+                terminal = "0"
+                termList = ""
             sbkonto = io.StringIO(sbkonto_f.stream.read().decode("latin-1"), newline=None)
             subkonto = subkontoList(sbkonto, IgaSubkonto)
 
@@ -145,18 +153,18 @@ def file_summer_page():
 
             output_data1 = ''
             error_part = ''
-            err_first =''
+            err_first = ''
             all_dates = []
 
 
 
             valjavotte = variableDict['PankStatement']
             if valjavotte == 'SEB':
-                col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col0','kood', 'tuup', 'summa', 'viite',
+                col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col0', 'kood', 'tuup', 'summa', 'viite',
                 'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
                 readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
             elif valjavotte in ('SWED', 'SWEDCR'):
-                col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi','col1', 'col0', 'tuup', 'summa', 'viite',
+                col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col1', 'col0', 'tuup', 'summa', 'viite',
                 'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
                 readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
                 next(readerS)  # пропускаем первую строку с заголовками
@@ -185,8 +193,7 @@ def file_summer_page():
                 subshet = ''
                 SumViivis = ''
                 err_flagCh = '1'
-                tv=''
-                termList = str(variableDict['term_nr']).split(' --/-- ')
+                tv = ''
                 selg = row['selgitus'].split(';')
                 SumTerm = ''
                 tterm = ''
@@ -217,7 +224,7 @@ def file_summer_page():
                                 i += 1
 
                             else: #если суммы нет - закрывается все на первый субконто
-                                if FindSum ==0:
+                                if FindSum == 0:
                                     sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row)
 
                         else: #если только одна сумма у субконто - закрывается все на первый субконто
@@ -246,7 +253,7 @@ def file_summer_page():
                     else:
                         SumAtS = str(row['summa']).replace(',', '.')
 
-                    if variableDict['terminal'] == '1':  #перебираем терминалы аtermListиз установочного файла
+                    if terminal == '1':  #перебираем терминалы аtermListиз установочного файла
                         for term_item in termList:
                             if term_item in row['selgitus']: #вытаскиваем сумму реализации и расхода из пояснения
                                 if valjavotte == 'SWED':
