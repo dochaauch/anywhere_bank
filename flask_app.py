@@ -123,11 +123,17 @@ def file_summer_page():
     else:
         if request.method == "POST":
 
+            #загрузка файлов
             input_file = request.files["input_first"]
+            sbkonto_f = request.files["input_subkonto"]
+            noaccount_f = request.files["input_except"]
+            statement_f = request.files["input_statement"]
+
+            #обработка файла first
             first = input_file.read().decode('UTF-8')
             variableDict = check_first(first)
 
-            sbkonto_f = request.files["input_subkonto"]
+            #обработка файла subkonto
             try:
                 IgaSubkonto = variableDict['IgaSubkonto']
                 viivis = variableDict['viivis']
@@ -142,13 +148,13 @@ def file_summer_page():
             subkonto = subkontoList(sbkonto, IgaSubkonto)
 
 
-            noaccount_f = request.files["input_except"]
+            #обработка файла исключений
             noaccount = io.StringIO(noaccount_f.stream.read().decode("latin-1"), newline=None)
             subexept = exception(noaccount)
 
 
             #загрузка основной обработки
-            statement_f = request.files["input_statement"]
+            #обработка банковской выписки
             csv_file = io.StringIO(statement_f.stream.read().decode("latin-1"), newline=None)
 
             output_data1 = ''
