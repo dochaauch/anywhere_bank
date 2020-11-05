@@ -1,12 +1,10 @@
 from processing import check_first,  subkontoList, exception, korrekt_dateSwed, korrekt_dateSEB, korrekt_dateLHV, \
-    first_row, mailSQL, mailText, matchSubkonto, terminalSumSwed, terminalSumSeb
-import io
+    first_row, matchSubkonto, terminalSumSwed, terminalSumSeb
 import csv
 
-def main_processing(input_file, sbkonto_f, noaccount_f, statement_f):
 
+def main_processing(first, sbkonto, noaccount, csv_file):
     # обработка файла first
-    first = input_file.read().decode('UTF-8')
     variableDict = check_first(first)
 
     # обработка файла subkonto
@@ -20,16 +18,13 @@ def main_processing(input_file, sbkonto_f, noaccount_f, statement_f):
         viivis = "0"
         terminal = "0"
         termList = ""
-    sbkonto = io.StringIO(sbkonto_f.stream.read().decode("latin-1"), newline=None)
     subkonto = subkontoList(sbkonto, IgaSubkonto)
 
     # обработка файла исключений
-    noaccount = io.StringIO(noaccount_f.stream.read().decode("latin-1"), newline=None)
     subexept = exception(noaccount)
 
     # загрузка основной обработки
     # обработка банковской выписки
-    csv_file = io.StringIO(statement_f.stream.read().decode("latin-1"), newline=None)
 
     output_data1 = ''
     error_part = ''
