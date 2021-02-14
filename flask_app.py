@@ -133,6 +133,7 @@ def file_summer_page():
             noaccount = io.StringIO(noaccount_f.stream.read().decode("latin-1"), newline=None)
             csv_file = io.StringIO(statement_f.stream.read().decode("latin-1"), newline=None)
 
+            #основная обработка
             output_data, log_aa, valjavotte = main_processing(first, sbkonto, noaccount, csv_file)
 
             response = make_response(output_data)

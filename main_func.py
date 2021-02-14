@@ -116,7 +116,7 @@ def main_processing(first, sbkonto, noaccount, csv_file):
             else:
                 SumAtS = str(row['summa']).replace(',', '.')
 
-            if terminal == '1':  # перебираем терминалы аtermListиз установочного файла
+            if terminal == '1':  # перебираем терминалы termList из установочного файла
                 for term_item in termList:
                     if term_item in row['selgitus']:  # вытаскиваем сумму реализации и расхода из пояснения
                         if valjavotte == 'SWED':
