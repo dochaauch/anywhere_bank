@@ -28,6 +28,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+
+
 app.secret_key = confid.app_secret_key
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -65,7 +67,6 @@ def make_session_permanent():
 
 
 @app.route("/", methods=["GET", "POST"])
-
 def login():
     if request.method == "GET":
         return render_template("login_page.html", error=False)
@@ -112,11 +113,15 @@ class AA(db.Model):
     aa_ow = db.Column(db.String(40))
 
 
+#def error_part(args):
+#    pass
 
 
 @app.route("/statement/", methods=["GET", "POST"])
 @login_required
+
 def file_summer_page():
+    error_part = ''
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
     else:
@@ -134,7 +139,7 @@ def file_summer_page():
             csv_file = io.StringIO(statement_f.stream.read().decode("latin-1"), newline=None)
 
             #основная обработка
-            output_data, log_aa, valjavotte = main_processing(first, sbkonto, noaccount, csv_file)
+            output_data, log_aa, valjavotte, error_part = main_processing(first, sbkonto, noaccount, csv_file)
 
             response = make_response(output_data)
             response.headers["Content-Disposition"] = "attachment; filename=result.txt"
@@ -147,5 +152,6 @@ def file_summer_page():
                             LOGS.log_aa == AA.aa_aa).order_by(db.desc(LOGS.log_id)).limit(1).all()
             mailSQL(mailText(formail))
             return response
-
-        return render_template("statement.html", error=True)
+            #return error_part
+            #output_data, log_aa, valjavotte, error_part = main_processing(first, sbkonto, noaccount, csv_file)
+        return render_template("statement.html", error=True, error_part=error_part)

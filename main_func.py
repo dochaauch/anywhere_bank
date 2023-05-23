@@ -201,4 +201,4 @@ def main_processing(first, sbkonto, noaccount, csv_file):
 
     output_data = str(first_rowOut) + output_data1 + err_first + error_part
 
-    return output_data, log_aa, valjavotte
+    return output_data, log_aa, valjavotte, error_part

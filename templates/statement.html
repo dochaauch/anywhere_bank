@@ -144,8 +144,12 @@ p {
             	</div>
 			</div>
 		<p><input type="submit" class="superbutton" name="submit" value="Обработка банковской выписки" /></p>
+		{% if error_part %}
+			<p>{{ error_part }}</p>
+		{% endif %}
 
 		</form>
+
 <script>
     ;
     (function(document, window, index) {
@@ -204,5 +208,6 @@ window.onload = function () {
 };
 
 </script>
+
 </body>
 </html>
