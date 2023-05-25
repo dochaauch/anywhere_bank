@@ -1,5 +1,6 @@
+import xml_process
 from processing import check_first,  subkontoList, exception, korrekt_dateSwed, korrekt_dateSEB, korrekt_dateLHV, \
-    first_row, matchSubkonto, terminalSumSwed, terminalSumSeb
+    first_row, matchSubkonto, terminalSumSwed, terminalSumSeb, translateString
 import csv
 
 
@@ -46,6 +47,11 @@ def main_processing(first, sbkonto, noaccount, csv_file):
                      'arhiiv', 'selgitus', 'col', 'valuuta', 'col2', 'col3', 'col4', 'col5', 'col6']
         readerS = csv.DictReader(csv_file, delimiter=',', fieldnames=col_names)
         next(readerS)  # пропускаем первую строку с заголовками
+    elif valjavotte == 'Coop_xml':
+        col_names = ['meie', 'kuupaev', 'aa', 'nimi', 'tuup', 'summa', 'selgitus', 'valuuta', ]
+        readerS = xml_process.main(csv_file)
+        #readerS = csv.DictReader(csv_file, delimiter=',', fieldnames=col_names)
+        next(readerS)  # пропускаем первую строку с заголовками
 
     for row in readerS:
         if valjavotte == 'SWED':
@@ -59,6 +65,8 @@ def main_processing(first, sbkonto, noaccount, csv_file):
             selg = str(row['selgitus']).strip(' ').split(' ')[2:]
             row['selgitus'] = ''.join(selg).strip()
         log_aa = row['meie']
+        row['selgitus'] = translateString(row['selgitus'])
+        row['nimi'] = translateString(row['nimi'])
         # подтягиваем значения из шестерки
         sk = ''
         shet = ''
@@ -132,7 +140,7 @@ def main_processing(first, sbkonto, noaccount, csv_file):
         else:
             if valjavotte in ('SWED', 'LHV', 'SWEDCR'):  # убираем знак минус из выписки
                 SumAtS = str(row['summa']).replace(',', '.')[1:]  # сумма в строке, если без пени
-            elif valjavotte == 'SEB':
+            elif valjavotte in ('SEB', 'Coop_xml'):
                 SumAtS = str(row['summa']).replace(',', '.')
             KShet = '"' + variableDict['ShetPank'] + '"'
             KSubShet = '"' + variableDict['SubShetPank'] + '"'

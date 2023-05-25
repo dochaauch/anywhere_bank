@@ -2,4 +2,4 @@
 export FLASK_ENV=development
 export FLASK_APP=flask_app
 
-flask run
+python3.7 -m flask run

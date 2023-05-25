@@ -1,4 +1,6 @@
 import csv
+from datetime import datetime
+
 import yagmail
 import confid
 import re
@@ -78,20 +80,13 @@ def korrekt_dateLHV(kuup):
     return '.'.join((day, month, year))
 
 def first_row(all_dates):
-        minD=min(all_dates)
-        maxD=max(all_dates)
-        #out = output_data1.split('\r\n')
-        #a = len(out)-2  #длина выборки
-        #for inx,row in enumerate(out): #нумеруем строки в выборке
-        #for row in out:
-        #    all_dates.append(row.split(',')[1])
-            #if inx==1: #первая строка в выборке
-            #    minD=row.split(',')[1]
-            #if inx ==a: #последняя строка в выборке
-            #    maxD =row.split(',')[1]
-        first_rowOut = '"' +str(minD)+'"' +','+'"' +str(maxD)+'"'  +','
-        #first_rowOut = str(all_dates)
-        return first_rowOut
+    date_objects = [datetime.strptime(date, "%d.%m.%y") for date in all_dates]
+    minD = min(date_objects)
+    maxD = max(date_objects)
+    minD_str = minD.strftime("%d.%m.%y")
+    maxD_str = maxD.strftime("%d.%m.%y")
+    first_rowOut = f'"{minD_str}","{maxD_str}",'
+    return first_rowOut
 
 
 def mailText(formail):
@@ -135,3 +130,11 @@ def terminalSumSeb(selg, summa):
     SumAtS = str(format(float(str(summa).replace(',', '.')) + float(SumTerm),'.2f')) # реализация = сумма по выписке
                                                                                     #  + расходы на терминал
     return SumAtS, SumTerm
+
+
+def translateString(our_string):
+    special_char_map = {ord('ä'): 'a', ord('ü'): 'u', ord('ö'): 'o', ord('õ'): 'o',
+                        ord('ž'): 'z', ord('š'): 's',
+                        ord('Ä'): 'A', ord('Ü'): 'U', ord('Ö'): 'O', ord('Õ'): 'O',
+                        ord('Z'): 'Z', ord('Š'): 's', ord('’'): ''}
+    return our_string.translate(special_char_map)
