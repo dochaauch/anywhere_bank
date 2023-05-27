@@ -47,10 +47,15 @@ def main_processing(first, sbkonto, noaccount, csv_file):
                      'arhiiv', 'selgitus', 'col', 'valuuta', 'col2', 'col3', 'col4', 'col5', 'col6']
         readerS = csv.DictReader(csv_file, delimiter=',', fieldnames=col_names)
         next(readerS)  # пропускаем первую строку с заголовками
-    elif valjavotte == 'Coop_xml':
-        col_names = ['meie', 'kuupaev', 'aa', 'nimi', 'tuup', 'summa', 'selgitus', 'valuuta', ]
-        readerS = xml_process.main(csv_file)
-        #readerS = csv.DictReader(csv_file, delimiter=',', fieldnames=col_names)
+    elif valjavotte in ('Coop_xml', 'Seb_xml'):
+        #col_names = ['meie', 'kuupaev', 'aa', 'nimi', 'tuup', 'summa', 'selgitus', 'valuuta', ]
+        gen_path_prefix = ["Document", "BkToCstmrStmt", "Stmt"]
+        readerS = xml_process.main(csv_file, gen_path_prefix)
+        next(readerS)  # пропускаем первую строку с заголовками
+    elif valjavotte == 'Swed_xml':
+        #col_names = ['meie', 'kuupaev', 'aa', 'nimi', 'tuup', 'summa', 'selgitus', 'valuuta', ]
+        gen_path_prefix = ["Document", "BkToCstmrAcctRpt", "Rpt"]
+        readerS = xml_process.main(csv_file, gen_path_prefix)
         next(readerS)  # пропускаем первую строку с заголовками
 
     for row in readerS:
@@ -140,8 +145,10 @@ def main_processing(first, sbkonto, noaccount, csv_file):
         else:
             if valjavotte in ('SWED', 'LHV', 'SWEDCR'):  # убираем знак минус из выписки
                 SumAtS = str(row['summa']).replace(',', '.')[1:]  # сумма в строке, если без пени
-            elif valjavotte in ('SEB', 'Coop_xml'):
+            elif valjavotte in ('SEB'):
                 SumAtS = str(row['summa']).replace(',', '.')
+            else:
+                SumAtS = str(row['summa'])
             KShet = '"' + variableDict['ShetPank'] + '"'
             KSubShet = '"' + variableDict['SubShetPank'] + '"'
             KSubkonto = variableDict['Subkonto']

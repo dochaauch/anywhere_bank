@@ -152,20 +152,19 @@ def df_for_csv(df):
     return new_df
 
 
-def main(csv_file):
+def main(csv_file, gen_path_prefix):
     #statement_file = "/Users/docha/Downloads/PanenkovaStatementCoop.xml"
     #statement_file = "/Users/docha/Downloads/PanenkovaStatementCoop.xml"
     xml_dict = read_xml_to_dict(csv_file)
-    gen_path_prefixSwed = ["Document", "BkToCstmrAcctRpt", "Rpt"]
-    gen_path_prefixCoop = ["Document", "BkToCstmrStmt", "Stmt"]
-    gen_info = gen_info_list(xml_dict, gen_path_prefixCoop)
-    result = transaction_process(xml_dict, gen_path_prefixCoop)
+    #gen_path_prefixSwed = ["Document", "BkToCstmrAcctRpt", "Rpt"]
+    #gen_path_prefixCoop = ["Document", "BkToCstmrStmt", "Stmt"]
+    gen_info = gen_info_list(xml_dict, gen_path_prefix)
+    result = transaction_process(xml_dict, gen_path_prefix)
     df = df_for_csv(result)
     csv_buffer = io.StringIO()
-    df.to_csv('test.csv', index=False)
+    #df.to_csv('test.csv', index=False)
     df.to_csv(csv_buffer, index=False)
     csv_buffer.seek(0)
-    #with csv_buffer as file:
     readerS = csv.DictReader(csv_buffer, delimiter=',')
     return readerS
 
