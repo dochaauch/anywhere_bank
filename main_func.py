@@ -9,16 +9,11 @@ def main_processing(first, sbkonto, noaccount, csv_file):
     variableDict = check_first(first)
 
     # обработка файла subkonto
-    try:
-        IgaSubkonto = variableDict['IgaSubkonto']
-        viivis = variableDict['viivis']
-        terminal = variableDict['terminal']
-        termList = str(variableDict['term_nr']).split(' --/-- ')
-    except:
-        IgaSubkonto = "0"
-        viivis = "0"
-        terminal = "0"
-        termList = ""
+    IgaSubkonto = variableDict.get('IgaSubkonto', '0')
+    viivis = variableDict.get('viivis', '0')
+    terminal = variableDict.get('terminal', '0')
+    termList = variableDict.get('term_nr', '').split(' --/-- ')
+
     subkonto = subkontoList(sbkonto, IgaSubkonto)
 
     # обработка файла исключений
@@ -48,12 +43,10 @@ def main_processing(first, sbkonto, noaccount, csv_file):
         readerS = csv.DictReader(csv_file, delimiter=',', fieldnames=col_names)
         next(readerS)  # пропускаем первую строку с заголовками
     elif valjavotte in ('Coop_xml', 'Seb_xml'):
-        #col_names = ['meie', 'kuupaev', 'aa', 'nimi', 'tuup', 'summa', 'selgitus', 'valuuta', ]
         gen_path_prefix = ["Document", "BkToCstmrStmt", "Stmt"]
         readerS = xml_process.main(csv_file, gen_path_prefix)
         next(readerS)  # пропускаем первую строку с заголовками
     elif valjavotte == 'Swed_xml':
-        #col_names = ['meie', 'kuupaev', 'aa', 'nimi', 'tuup', 'summa', 'selgitus', 'valuuta', ]
         gen_path_prefix = ["Document", "BkToCstmrAcctRpt", "Rpt"]
         readerS = xml_process.main(csv_file, gen_path_prefix)
         next(readerS)  # пропускаем первую строку с заголовками
