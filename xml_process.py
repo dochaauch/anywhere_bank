@@ -16,12 +16,6 @@ def time_format():
 ic.configureOutput(prefix=time_format, includeContext=True)
 
 
-def read_xml_to_dict0(statement_file):
-    with open(statement_file, "r") as f:
-        xml_data = f.read()
-    xml_dict = xmltodict.parse(xml_data)
-    return xml_dict
-
 def read_xml_to_dict(statement_file):
     xml_data = statement_file.getvalue()
     xml_dict = xmltodict.parse(xml_data)
@@ -97,7 +91,6 @@ def transaction_process(xml_dict, gen_path_prefix):
                      + result['TxDtls.RltdPties.Dbtr.Nm'].fillna('')
     result['tuup'] = result['CdtDbtInd'].str.get(0)
     result['kuupaev'] = result['BookgDt'].apply(lambda x: pd.to_datetime(x['Dt']).strftime('%d.%m.%y'))
-    # result['viite'] = result['TxDtls.RmtInf.Strd.CdtrRefInf.Ref'].fillna('') +
     result['valuuta'] = result['Amt'].apply(lambda x: x['@Ccy'])
     #print(result.to_string())
     return result
@@ -120,28 +113,16 @@ def flatten_dict(d: MutableMapping, parent_key: str = '', sep: str = '.'):
 #print(transaction_list_full)
 
 
-
-
-#'meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col0', 'kood', 'tuup', 'summa', 'viite',
-#                     'arhiiv', 'selgitus', 'col', 'valuuta', 'col2'
-
 def df_for_csv(df):
     columns_to_keep = {
         'meie': 'meie',
-        #'nr': None,
-        #'kuupaev': lambda x: pd.to_datetime(x['BookgDt']['Dt']).strftime('%d-%m-%Y'),
         'kuupaev': 'kuupaev',
         'aa': 'aa',
         'nimi': 'nimi',
-        #'col0': None,
-        #'kood': None,
         'tuup': 'tuup',
         'TxDtls.AmtDtls.TxAmt.Amt.#text': 'summa',
-        #'arhiiv': None,
         'TxDtls.RmtInf.Ustrd': 'selgitus',
-        #'col': None,
         'valuuta': 'valuuta',
-        #'col2': None,
     }
 
     # Create a new DataFrame with selected columns and renamed columns
@@ -153,11 +134,7 @@ def df_for_csv(df):
 
 
 def main(csv_file, gen_path_prefix):
-    #statement_file = "/Users/docha/Downloads/PanenkovaStatementCoop.xml"
-    #statement_file = "/Users/docha/Downloads/PanenkovaStatementCoop.xml"
     xml_dict = read_xml_to_dict(csv_file)
-    #gen_path_prefixSwed = ["Document", "BkToCstmrAcctRpt", "Rpt"]
-    #gen_path_prefixCoop = ["Document", "BkToCstmrStmt", "Stmt"]
     gen_info = gen_info_list(xml_dict, gen_path_prefix)
     result = transaction_process(xml_dict, gen_path_prefix)
     df = df_for_csv(result)

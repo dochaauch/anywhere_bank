@@ -75,6 +75,10 @@ def main_processing(first, sbkonto, noaccount, csv_file):
         selg = row['selgitus'].split(';')
         SumTerm = ''
         tterm = ''
+        newline = "\r\n"
+        tt_several_sum = []
+        tt_string = ""
+        tt_string_list = []
 
         # прокручиваем список исключений без расчетных счетов
         for exeption in subexept:
@@ -91,6 +95,7 @@ def main_processing(first, sbkonto, noaccount, csv_file):
                 if len(subkonto.get(row['aa'])) > 1:
                     i = 0
                     countArve = len(subkonto.get(row['aa'])) - 1
+                    print(subkonto.get(row['aa']))
                     while i <= countArve:  # ищем совпадающую сумму в субконто
                         if subkonto.get(row['aa'])[i][2] == str(row['summa']).replace(',', '.'):
                             sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row, i)
@@ -98,9 +103,22 @@ def main_processing(first, sbkonto, noaccount, csv_file):
                             FindSum = 1
                         i += 1
 
+
                     else:  # если суммы нет - закрывается все на первый субконто
-                        if FindSum == 0:
-                            sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row)
+                        #if FindSum == 0:
+                        #    sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row)
+                        # закрываем по одному все счета
+                        #tt_several_sum = []
+                        row_summa = float(str(row['summa']).replace(',', '.'))
+                        i = 0
+                        while row_summa > 0:
+                            sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row, i)
+                            sumSub = round(float(subkonto.get(row['aa'])[i][2]),2)
+                            row_summa -= round(sumSub, 2)
+                            i += 1
+                            tt_several_sum.append([sk, shet, subshet, sumSub])
+
+
 
                 else:  # если только одна сумма у субконто - закрывается все на первый субконто
                     sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row)
@@ -135,6 +153,15 @@ def main_processing(first, sbkonto, noaccount, csv_file):
             KSubShet = '"' + subshet + '"'
             DSubkonto = variableDict['Subkonto']
             KSubkonto = sk
+            if len(tt_several_sum) > 0:
+                print("Kredit ", tt_several_sum)
+                #if tt_several_sum:
+                #tt_string = ""
+                for tt in tt_several_sum:
+                    tt_string = f'''"{variableDict['zhurnal']}","{row['kuupaev']}","{DShet}","{DSubShet}","{tt[1]}","{tt[2]}","{tt[3]}","{row['selgitus'] + ' ' + row['nimi']}","{DSubkonto}","{tt[0]}","","",""{newline}'''
+                    tt_string_list.append(tt_string)
+
+        #if row['tuup'] == 'D':
         else:
             if valjavotte in ('SWED', 'LHV', 'SWEDCR'):  # убираем знак минус из выписки
                 SumAtS = str(row['summa']).replace(',', '.')[1:]  # сумма в строке, если без пени
@@ -148,20 +175,31 @@ def main_processing(first, sbkonto, noaccount, csv_file):
             DSubkonto = sk
             DShet = '"' + shet + '"'
             DSubShet = '"' + subshet + '"'
+            if len(tt_several_sum) > 0:
+                print("Deebit ", tt_several_sum)
+                # if tt_several_sum:
+                #tt_string = ""
+                for tt in tt_several_sum:
+                    tt_string = (f'''"{variableDict['zhurnal']}","{row['kuupaev']}","{tt[1]}","{tt[2]}","{KShet}","{KSubShet}",
+                    "{tt[3]}","{row['selgitus'] + ' ' + row['nimi']}","{tt[0]}","{KSubkonto}","","",""{newline}''')
+                    tt_string_list.append(tt_string)
 
-        # собираем строку в файл вывода
-        tt = '"' + variableDict['zhurnal'] + '"' + ',' + \
-             '"' + row['kuupaev'] + '",' + \
-             DShet + ',' + \
-             DSubShet + ',' + \
-             KShet + ',' + \
-             KSubShet + ',' + \
-             '"' + SumAtS + '",' + \
-             '"' + row['selgitus'] + ' ' + row['nimi'] + '",' + \
-             '"' + DSubkonto + '",' + \
-             '"' + KSubkonto + '",' + \
-             '"","",""' + '\r\n'
-        # собираем все даты для первой строки, чтобы найти начало и конец
+        if len(tt_string_list) > 0:
+            tt = "".join(tt_string_list)
+        else:
+            # собираем строку в файл вывода
+            tt = '"' + variableDict['zhurnal'] + '"' + ',' + \
+                 '"' + row['kuupaev'] + '",' + \
+                 DShet + ',' + \
+                 DSubShet + ',' + \
+                 KShet + ',' + \
+                 KSubShet + ',' + \
+                 '"' + SumAtS + '",' + \
+                 '"' + row['selgitus'] + ' ' + row['nimi'] + '",' + \
+                 '"' + DSubkonto + '",' + \
+                 '"' + KSubkonto + '",' + \
+                 '"","",""' + '\r\n'
+            # собираем все даты для первой строки, чтобы найти начало и конец
         all_dates.append(row['kuupaev'])
 
         if SumViivis != '':  # собираем строку пени

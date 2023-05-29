@@ -12,7 +12,7 @@ def check_first(first):
     # подключаем переменные:
     variableDict = {}
     for line in first.split('\n'):
-        print(line)
+        #print(line)
         if line.startswith('#'):
             pass
         else:
