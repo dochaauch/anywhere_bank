@@ -138,7 +138,10 @@ def file_summer_page():
             sbkonto = io.StringIO(sbkonto_f.stream.read().decode("utf-8"), newline=None)
             #noaccount = io.StringIO(noaccount_f.stream.read().decode("latin-1"), newline=None)
             noaccount = io.StringIO(noaccount_f.stream.read().decode("utf-8"), newline=None)
-            csv_file = io.StringIO(statement_f.stream.read().decode("utf-8"), newline=None)
+            try:
+                csv_file = io.StringIO(statement_f.stream.read().decode("utf-8"), newline=None)
+            except:
+                csv_file = io.StringIO(statement_f.stream.read().decode("latin-1"), newline=None)
 
             #основная обработка
             output_data, log_aa, valjavotte, error_part = main_processing(first, sbkonto, noaccount, csv_file)

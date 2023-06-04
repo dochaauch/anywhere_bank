@@ -47,7 +47,8 @@ def main_processing(first, sbkonto, noaccount, csv_file):
         readerS = xml_process.main(csv_file, gen_path_prefix)
         next(readerS)  # пропускаем первую строку с заголовками
     elif valjavotte == 'Swed_xml':
-        gen_path_prefix = ["Document", "BkToCstmrAcctRpt", "Rpt"]
+        #gen_path_prefix = ["Document", "BkToCstmrAcctRpt", "Rpt"]
+        gen_path_prefix = ["Document", "BkToCstmrStmt", "Stmt"]
         readerS = xml_process.main(csv_file, gen_path_prefix)
         next(readerS)  # пропускаем первую строку с заголовками
 
