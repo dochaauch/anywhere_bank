@@ -12,7 +12,7 @@ noaccount = open(noaccount_f)
 csv_file = open(statement_f)
 
 
-output_data, log_aa, valjavotte = main_processing(first, sbkonto, noaccount, csv_file)
+output_data, log_aa, valjavotte, error_part = main_processing(first, sbkonto, noaccount, csv_file)
 
 open('/Users/docha/PycharmProjects/anywhere_bank/ testing/result.txt', 'w').close()
 

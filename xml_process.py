@@ -129,7 +129,7 @@ def df_for_csv(df):
     new_df = df.loc[:, columns_to_keep.keys()].rename(columns=columns_to_keep)
 
     # Print the new DataFrame
-    #print(new_df.to_string())
+    print(new_df.to_string())
     return new_df
 
 

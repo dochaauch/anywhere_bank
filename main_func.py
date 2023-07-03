@@ -8,12 +8,13 @@ def main_processing(first, sbkonto, noaccount, csv_file):
     # обработка файла first
     variableDict = check_first(first)
 
-    # обработка файла subkonto
+    # обработка файла first
     IgaSubkonto = variableDict.get('IgaSubkonto', '0')
     viivis = variableDict.get('viivis', '0')
     terminal = variableDict.get('terminal', '0')
     termList = variableDict.get('term_nr', '').split(' --/-- ')
 
+    # обработка файла subkonto
     subkonto = subkontoList(sbkonto, IgaSubkonto)
 
     # обработка файла исключений
@@ -95,28 +96,32 @@ def main_processing(first, sbkonto, noaccount, csv_file):
                 if len(subkonto.get(row['aa'])) > 1:
                     i = 0
                     countArve = len(subkonto.get(row['aa'])) - 1
-                    print(subkonto.get(row['aa']))
                     while i <= countArve:  # ищем совпадающую сумму в субконто
                         if subkonto.get(row['aa'])[i][2] == str(row['summa']).replace(',', '.'):
                             sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row, i)
                             sumSub = subkonto.get(row['aa'])[i][2]
+                            subkonto[row['aa']][i][2] = 0
                             FindSum = 1
                         i += 1
 
 
                     else:  # если суммы нет - закрывается все на первый субконто
-                        #if FindSum == 0:
+                        if FindSum == 0:
                         #    sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row)
                         # закрываем по одному все счета
                         #tt_several_sum = []
-                        row_summa = float(str(row['summa']).replace(',', '.'))
-                        i = 0
-                        while row_summa > 0:
-                            sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row, i)
-                            sumSub = round(float(subkonto.get(row['aa'])[i][2]),2)
-                            row_summa -= round(sumSub, 2)
-                            i += 1
-                            tt_several_sum.append([sk, shet, subshet, sumSub])
+                            row_summa = float(str(row['summa']).replace(',', '.'))
+                            i = 0
+                            while row_summa > 0:
+                                sk, shet, subshet, err_flagCh = matchSubkonto(subkonto, row, i)
+                                try:
+                                    sumSub = round(float(subkonto.get(row['aa'])[i][2]), 2)
+                                    row_summa -= round(sumSub, 2)
+                                    i += 1
+                                    tt_several_sum.append([sk, shet, subshet, sumSub])
+                                except:
+                                    break
+
 
 
 
@@ -169,12 +174,12 @@ def main_processing(first, sbkonto, noaccount, csv_file):
                 SumAtS = str(row['summa']).replace(',', '.')
             else:
                 SumAtS = str(row['summa'])
-            KShet = '"' + variableDict['ShetPank'] + '"'
-            KSubShet = '"' + variableDict['SubShetPank'] + '"'
+            KShet = f'"{variableDict["ShetPank"]}"'
+            KSubShet = f'"{variableDict["SubShetPank"]}"'
             KSubkonto = variableDict['Subkonto']
             DSubkonto = sk
-            DShet = '"' + shet + '"'
-            DSubShet = '"' + subshet + '"'
+            DShet = f'"{shet}"'
+            DSubShet = f'"{subshet}"'
             if len(tt_several_sum) > 0:
                 print("Deebit ", tt_several_sum)
                 # if tt_several_sum:
