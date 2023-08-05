@@ -141,6 +141,6 @@ def translateString(our_string):
                         ord('ž'): 'z', ord('š'): 's',
                         ord('Ä'): 'A', ord('Ü'): 'U', ord('Ö'): 'O', ord('Õ'): 'O',
                         ord('Z'): 'Z', ord('Š'): 'S', ord('’'): '',
-                        ord('Ł'): 'L',
+                        ord('Ł'): 'L', ord('Ę'): 'E',
                         }
     return our_string.translate(special_char_map)
