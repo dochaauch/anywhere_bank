@@ -12,6 +12,7 @@ import confid
 from main_func import main_processing
 
 
+
 app = Flask(__name__)
 app.config["DEBUG"] = True
 app.config["SECRET_KEY"] = confid.secret_key

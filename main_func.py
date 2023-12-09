@@ -163,7 +163,8 @@ def main_processing(first, sbkonto, noaccount, csv_file):
                 #if tt_several_sum:
                 #tt_string = ""
                 for tt in tt_several_sum:
-                    tt_string = f'''"{variableDict['zhurnal']}","{row['kuupaev']}","{DShet}","{DSubShet}","{tt[1]}","{tt[2]}","{tt[3]}","{row['selgitus'] + ' ' + row['nimi']}","{DSubkonto}","{tt[0]}","","",""{newline}'''
+                    print("tt ", tt)
+                    tt_string = f'''"{variableDict['zhurnal']}","{row['kuupaev']}",{DShet},{DSubShet},"{tt[1]}","{tt[2]}","{tt[3]}","{row['selgitus'] + ' ' + row['nimi']}","{DSubkonto}","{tt[0]}","","",""{newline}'''
                     tt_string_list.append(tt_string)
 
         #if row['tuup'] == 'D':
@@ -185,7 +186,7 @@ def main_processing(first, sbkonto, noaccount, csv_file):
                 # if tt_several_sum:
                 #tt_string = ""
                 for tt in tt_several_sum:
-                    tt_string = (f'''"{variableDict['zhurnal']}","{row['kuupaev']}","{tt[1]}","{tt[2]}","{KShet}","{KSubShet}",
+                    tt_string = (f'''"{variableDict['zhurnal']}","{row['kuupaev']}","{tt[1]}","{tt[2]}",{KShet},{KSubShet},
                     "{tt[3]}","{row['selgitus'] + ' ' + row['nimi']}","{tt[0]}","{KSubkonto}","","",""{newline}''')
                     tt_string_list.append(tt_string)
 
