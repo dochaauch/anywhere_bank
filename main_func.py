@@ -6,89 +6,21 @@ import csv
 
 def main_processing(first, sbkonto, noaccount, csv_file):
     # обработка файла first
-    variableDict = check_first(first)
-
-    # обработка файла first
-    IgaSubkonto = variableDict.get('IgaSubkonto', '0')
-    viivis = variableDict.get('viivis', '0')
-    terminal = variableDict.get('terminal', '0')
-    termList = variableDict.get('term_nr', '').split(' --/-- ')
-
-    # обработка файла subkonto
-    subkonto = subkontoList(sbkonto, IgaSubkonto)
-
-    # обработка файла исключений
-    subexept = exception(noaccount)
+    IgaSubkonto, subexept, subkonto, termList, terminal, variableDict, viivis = load_primary_dictionaries(first,
+                                                                                                          noaccount,
+                                                                                                          sbkonto)
 
     # загрузка основной обработки
-    # обработка банковской выписки
-
-    output_data1 = ''
-    error_part = ''
-    err_first = ''
-    all_dates = []
-
-    valjavotte = variableDict['PankStatement']
-    if valjavotte == 'SEB':
-        col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col0', 'kood', 'tuup', 'summa', 'viite',
-                     'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
-        readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
-    elif valjavotte in ('SWED', 'SWEDCR'):
-        col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col1', 'col0', 'tuup', 'summa', 'viite',
-                     'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
-        readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
-        next(readerS)  # пропускаем первую строку с заголовками
-    elif valjavotte == 'LHV':
-        col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col1', 'col0', 'tuup', 'summa', 'viite',
-                     'arhiiv', 'selgitus', 'col', 'valuuta', 'col2', 'col3', 'col4', 'col5', 'col6']
-        readerS = csv.DictReader(csv_file, delimiter=',', fieldnames=col_names)
-        next(readerS)  # пропускаем первую строку с заголовками
-    elif valjavotte in ('Coop_xml', 'Seb_xml'):
-        gen_path_prefix = ["Document", "BkToCstmrStmt", "Stmt"]
-        readerS = xml_process.main(csv_file, gen_path_prefix)
-    elif valjavotte == 'Swed_xml':
-        #gen_path_prefix = ["Document", "BkToCstmrAcctRpt", "Rpt"]
-        gen_path_prefix = ["Document", "BkToCstmrStmt", "Stmt"]
-        readerS = xml_process.main(csv_file, gen_path_prefix)
-
+    all_dates, err_first, error_part, output_data1, readerS, valjavotte = process_bank_statement(csv_file, variableDict)
 
     for row in readerS:
-        if valjavotte == 'SWED':
-            row['kuupaev'] = korrekt_dateSwed(row['kuupaev'])
-        elif valjavotte == 'SEB':
-            row['kuupaev'] = korrekt_dateSEB(row['kuupaev'])
-        elif valjavotte == 'LHV':
-            row['kuupaev'] = korrekt_dateLHV(row['kuupaev'])
-        elif valjavotte == 'SWEDCR':
-            row['kuupaev'] = str(row['selgitus']).split(' ')[1]
-            selg = str(row['selgitus']).strip(' ').split(' ')[2:]
-            row['selgitus'] = ''.join(selg).strip()
-        log_aa = row['meie']
-        row['selgitus'] = translateString(row['selgitus'])
-        row['nimi'] = translateString(row['nimi'])
+        log_aa = data_according_to_bank(row, valjavotte)
         # подтягиваем значения из шестерки
-        sk = ''
-        shet = ''
-        subshet = ''
-        SumViivis = ''
-        err_flagCh = '1'
-        tv = ''
-        selg = row['selgitus'].split(';')
-        SumTerm = ''
-        tterm = ''
-        newline = "\r\n"
-        tt_several_sum = []
-        tt_string = ""
-        tt_string_list = []
+        SumTerm, SumViivis, err_flagCh, newline, selg, shet, sk, subshet, tt_several_sum, tt_string_list, tterm, tv = init_1c_data(
+            row)
 
         # прокручиваем список исключений без расчетных счетов
-        for exeption in subexept:
-            a = exeption['field']
-            if exeption[' value'] in row[a]:
-                sk = exeption[' subkonto']
-                shet = exeption[' konto']
-                subshet = exeption[' subk']
-                err_flagCh = '0'
+        err_flagCh, shet, sk, subshet = exception_list(err_flagCh, row, shet, sk, subexept, subshet)
 
         if row['aa'] in subkonto:
             FindSum = 0
@@ -205,6 +137,20 @@ def main_processing(first, sbkonto, noaccount, csv_file):
                  '"' + DSubkonto + '",' + \
                  '"' + KSubkonto + '",' + \
                  '"","",""' + '\r\n'
+            tt = (
+                f'"{variableDict["zhurnal"]}",'
+                f'"{row["kuupaev"]}",'
+                f'"{DShet}",'
+                f'"{DSubShet}",'
+                f'"{KShet}",'
+                f'"{KSubShet}",'
+                f'"{SumAtS}",'
+                f'"{row["selgitus"]} {row["nimi"]}",'
+                f'"{DSubkonto}",'
+                f'"{KSubkonto}",'
+                f'"","",""\r\n'
+            )
+
             # собираем все даты для первой строки, чтобы найти начало и конец
         all_dates.append(row['kuupaev'])
 
@@ -254,3 +200,93 @@ def main_processing(first, sbkonto, noaccount, csv_file):
     output_data = str(first_rowOut) + output_data1 + err_first + error_part
 
     return output_data, log_aa, valjavotte, error_part
+
+
+def exception_list(err_flagCh, row, shet, sk, subexept, subshet):
+    for exeption in subexept:
+        a = exeption['field']
+        if exeption[' value'] in row[a]:
+            sk = exeption[' subkonto']
+            shet = exeption[' konto']
+            subshet = exeption[' subk']
+            err_flagCh = '0'
+    return err_flagCh, shet, sk, subshet
+
+
+def init_1c_data(row):
+    sk = ''
+    shet = ''
+    subshet = ''
+    SumViivis = ''
+    err_flagCh = '1'
+    tv = ''
+    selg = row['selgitus'].split(';')
+    SumTerm = ''
+    tterm = ''
+    newline = "\r\n"
+    tt_several_sum = []
+    tt_string = ""
+    tt_string_list = []
+    return SumTerm, SumViivis, err_flagCh, newline, selg, shet, sk, subshet, tt_several_sum, tt_string_list, tterm, tv
+
+
+def data_according_to_bank(row, valjavotte):
+    if valjavotte == 'SWED':
+        row['kuupaev'] = korrekt_dateSwed(row['kuupaev'])
+    elif valjavotte == 'SEB':
+        row['kuupaev'] = korrekt_dateSEB(row['kuupaev'])
+    elif valjavotte == 'LHV':
+        row['kuupaev'] = korrekt_dateLHV(row['kuupaev'])
+    elif valjavotte == 'SWEDCR':
+        row['kuupaev'] = str(row['selgitus']).split(' ')[1]
+        selg = str(row['selgitus']).strip(' ').split(' ')[2:]
+        row['selgitus'] = ''.join(selg).strip()
+    log_aa = row['meie']
+    row['selgitus'] = translateString(row['selgitus'])
+    row['nimi'] = translateString(row['nimi'])
+    return log_aa
+
+
+def process_bank_statement(csv_file, variableDict):
+    # обработка банковской выписки
+    output_data1 = ''
+    error_part = ''
+    err_first = ''
+    all_dates = []
+    valjavotte = variableDict['PankStatement']
+    if valjavotte == 'SEB':
+        col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col0', 'kood', 'tuup', 'summa', 'viite',
+                     'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
+        readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
+    elif valjavotte in ('SWED', 'SWEDCR'):
+        col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col1', 'col0', 'tuup', 'summa', 'viite',
+                     'arhiiv', 'selgitus', 'col', 'valuuta', 'col2']
+        readerS = csv.DictReader(csv_file, delimiter=';', fieldnames=col_names)
+        next(readerS)  # пропускаем первую строку с заголовками
+    elif valjavotte == 'LHV':
+        col_names = ['meie', 'nr', 'kuupaev', 'aa', 'nimi', 'col1', 'col0', 'tuup', 'summa', 'viite',
+                     'arhiiv', 'selgitus', 'col', 'valuuta', 'col2', 'col3', 'col4', 'col5', 'col6']
+        readerS = csv.DictReader(csv_file, delimiter=',', fieldnames=col_names)
+        next(readerS)  # пропускаем первую строку с заголовками
+    elif valjavotte in ('Coop_xml', 'Seb_xml'):
+        gen_path_prefix = ["Document", "BkToCstmrStmt", "Stmt"]
+        readerS = xml_process.main(csv_file, gen_path_prefix)
+    elif valjavotte == 'Swed_xml':
+        # gen_path_prefix = ["Document", "BkToCstmrAcctRpt", "Rpt"]
+        gen_path_prefix = ["Document", "BkToCstmrStmt", "Stmt"]
+        readerS = xml_process.main(csv_file, gen_path_prefix)
+    return all_dates, err_first, error_part, output_data1, readerS, valjavotte
+
+
+def load_primary_dictionaries(first, noaccount, sbkonto):
+    variableDict = check_first(first)
+    # обработка файла first
+    IgaSubkonto = variableDict.get('IgaSubkonto', '0')
+    viivis = variableDict.get('viivis', '0')
+    terminal = variableDict.get('terminal', '0')
+    termList = variableDict.get('term_nr', '').split(' --/-- ')
+    # обработка файла subkonto
+    subkonto = subkontoList(sbkonto, IgaSubkonto)
+    # обработка файла исключений
+    subexept = exception(noaccount)
+    return IgaSubkonto, subexept, subkonto, termList, terminal, variableDict, viivis
